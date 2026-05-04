@@ -38,6 +38,13 @@ minutes.
 
 This repo was locally verified with Python 3.13.
 
+Get the code first:
+
+```bash
+git clone https://github.com/kalinbas/ai-code-workshop-buggy-api.git
+cd ai-code-workshop-buggy-api
+```
+
 Check your Python version first:
 
 ```bash
@@ -47,19 +54,34 @@ python3 --version
 If that prints a version below 3.10, use a newer executable such as
 `python3.13`, `python3.12`, `python3.11`, or `python3.10` in the setup commands.
 
-## Setup
+## Setup on macOS or Linux
 
 ```bash
-PYTHON=python3.13  # change this if your newer Python uses another name
+PYTHON=python3.13  # change this if your Python 3.10+ uses another name
 $PYTHON -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 python -m pip install -e ".[dev]"
 pytest --collect-only
 pytest
 ```
 
+## Setup on Windows PowerShell
+
+```powershell
+py -3.13 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+pytest --collect-only
+pytest
+```
+
+Use `py -3.12`, `py -3.11`, or `py -3.10` if that is the Python version you
+have installed.
+
 The full test suite should collect successfully and then fail. That is the
 starting point for the workshop.
+
+Keep the virtual environment activated for the commands below.
 
 Run the API:
 
@@ -86,7 +108,7 @@ make run              # start the API
 ```
 
 If your newer Python is not named `python3`, run commands as
-`make PYTHON=python3.13 check-setup`.
+`make PYTHON=python3.13 check-setup`, or activate the virtual environment first.
 
 You can also run one exercise at a time:
 
