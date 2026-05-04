@@ -1,5 +1,6 @@
 import { createServer as createHttpServer } from "node:http";
-import { getCurrentCustomer } from "./auth.js";
+import { fileURLToPath } from "node:url";
+import { getCurrentCustomer, requireAdmin } from "./auth.js";
 import { auditLog, orders } from "./data.js";
 import { HttpError } from "./http-error.js";
 import { calculateOrderTotal } from "./pricing.js";
@@ -114,7 +115,7 @@ export function createApp() {
   });
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const port = Number(process.env.PORT ?? 8000);
   createApp().listen(port, () => {
     console.log(`Server running at http://127.0.0.1:${port}`);

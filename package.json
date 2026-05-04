@@ -10,7 +10,7 @@
   "scripts": {
     "check-setup": "node -e \"const major = Number(process.versions.node.split('.')[0]); console.log(process.version); if (major < 20) process.exit(1);\"",
     "start": "node app/server.js",
-    "smoke": "node --test --test-name-pattern=\"valid order\"",
+    "smoke": "node --test --test-name-pattern=\"valid order\" tests/validation.test.js",
     "test": "node --test",
     "test:baseline": "node --test --test-name-pattern=baseline",
     "test:extension": "node --test --test-name-pattern=extension",
