@@ -1,141 +1,192 @@
-"""Small presentation demo: vague refactor prompt vs. better prompt.
+"""Presentation demo: vague refactor prompt vs. better prompt.
 
 Run:
     python examples/refactor_prompt_demo.py
 
 Presentation flow:
-1. Show `total_messy`.
-2. Ask AI: "Refactor this function." Show `total_meh_result`.
-3. Improve the prompt. Show `total_good_result`.
+1. Show `summarize_cart`.
+2. Ask AI: "Refactor this function." Show `summarize_cart_meh_result`.
+3. Improve the prompt. Show `summarize_cart_good_result`.
 
-The point is not that AI magically becomes perfect. The point is that a better
-prompt names the job: preserve behavior, expose rules, avoid over-design, and
-give yourself a safety check.
+Lesson: a vague prompt can make code prettier while preserving the bugs.
 """
-
-from __future__ import annotations
-
-from typing import Any
-
-TAX_RATE = 0.16
-BASE_SHIPPING = 5.00
-HEAVY_SURCHARGE = 4.00
-
-SAMPLE_ORDER = {
-    "customer_tier": "vip",
-    "coupon": "WELCOME10",
-    "items": [
-        {"sku": "BOOK", "kind": "merch", "price": 30.00, "qty": 2, "heavy": False},
-        {"sku": "MUG", "kind": "merch", "price": 15.00, "qty": 4, "heavy": True},
-        {"sku": "GIFT", "kind": "gift_card", "price": 25.00, "qty": 1, "heavy": False},
-    ],
-}
 
 VAGUE_PROMPT = "Refactor this function."
 
 BETTER_PROMPT = """
-Refactor this function without changing behavior.
-Constraints:
-- keep one public function that accepts the same order dictionary
-- extract helpers only when they reveal a business rule
-- name the rules clearly: gift cards, volume discount, coupon, shipping, tax
-- keep it small enough for a workshop slide
-- add a tiny assertion that proves the refactor preserved the sample result
+Refactor this function, but first identify likely business-rule bugs.
+Keep the same public signature and return shape.
+Fix only these rules:
+- SAVE10 discounts the subtotal only, not tax or shipping
+- premium free shipping uses subtotal before discount and starts at >= 100
 """
 
+PRODUCTS = {
+    "book": (42, True, True, False),
+    "usb": (25, True, True, False),
+    "keyboard": (100, True, True, True),
+    "gift-card": (50, False, False, False),
+}
 
-def total_messy(o: dict[str, Any]) -> float:
-    a = 0.0
-    b = 0.0
-    c = 0.0
-    d = BASE_SHIPPING
 
-    for x in o["items"]:
-        q = x.get("qty", 1)
-        line = x["price"] * q
-        if x["kind"] == "gift_card":
-            b += line
+def summarize_cart(cart, user, coupon=None):
+    total = 0
+    tax = 0
+    shipping = 5
+    warnings = []
+
+    for item in cart:
+        sku = item.get("sku")
+        qty = item.get("qty", 1)
+
+        if sku == "book":
+            price = 42
+            taxable = True
+            shippable = True
+            heavy = False
+        elif sku == "usb":
+            price = 25
+            taxable = True
+            shippable = True
+            heavy = False
+        elif sku == "keyboard":
+            price = 100
+            taxable = True
+            shippable = True
+            heavy = True
+        elif sku == "gift-card":
+            price = 50
+            taxable = False
+            shippable = False
+            heavy = False
         else:
-            a += line
-            if q >= 3:
-                c += line * 0.05
-            if x.get("heavy") and o.get("customer_tier") != "vip":
-                d += HEAVY_SURCHARGE
+            warnings.append("unknown sku ignored")
+            continue
 
-    if o.get("coupon") == "WELCOME10":
-        c += (a - c) * 0.10
-    if o.get("customer_tier") == "vip" and a >= 75:
-        d = 0.0
+        line = price * qty
+        total += line
 
-    return round(a + b - c + ((a - c) * TAX_RATE) + d, 2)
+        if taxable:
+            tax += line * 0.16
 
+        if shippable and heavy:
+            shipping += 3
 
-def total_meh_result(order: dict[str, Any]) -> float:
-    """Typical meh result from a vague prompt: nicer names, same tangle."""
-    merchandise_total = 0.0
-    gift_card_total = 0.0
-    discount = 0.0
-    shipping = BASE_SHIPPING
+    if coupon == "SAVE10":
+        # bug: discounts tax and shipping too
+        discount = (total + tax + shipping) * 0.10
+    else:
+        discount = 0
 
-    for item in order["items"]:
-        quantity = item.get("qty", 1)
-        item_total = item["price"] * quantity
-        if item["kind"] == "gift_card":
-            gift_card_total += item_total
-        else:
-            merchandise_total += item_total
-            if quantity >= 3:
-                discount += item_total * 0.05
-            if item.get("heavy") and order.get("customer_tier") != "vip":
-                shipping += HEAVY_SURCHARGE
+    if user.get("premium") and total - discount > 100:
+        # bug: threshold should be before discount and >= 100
+        shipping = 0
 
-    if order.get("coupon") == "WELCOME10":
-        discount += (merchandise_total - discount) * 0.10
-    if order.get("customer_tier") == "vip" and merchandise_total >= 75:
-        shipping = 0.0
+    final = total + tax + shipping - discount
 
-    tax = (merchandise_total - discount) * TAX_RATE
-    return round(merchandise_total + gift_card_total - discount + tax + shipping, 2)
+    return {
+        "subtotal": round(total, 2),
+        "tax": round(tax, 2),
+        "shipping": round(shipping, 2),
+        "discount": round(discount, 2),
+        "total": round(final, 2),
+        "warnings": warnings,
+    }
 
 
-def total_good_result(order: dict[str, Any]) -> float:
-    """Better result: still small, but each helper names a rule."""
+def summarize_cart_meh_result(cart, user, coupon=None):
+    """Typical vague-prompt result: tidier lookup, same hidden rule bugs."""
+    subtotal = 0
+    tax = 0
+    shipping = 5
+    warnings = []
 
-    def line_total(item: dict[str, Any]) -> float:
-        return item["price"] * item.get("qty", 1)
+    for item in cart:
+        product = PRODUCTS.get(item.get("sku"))
+        if product is None:
+            warnings.append("unknown sku ignored")
+            continue
 
-    def is_gift_card(item: dict[str, Any]) -> bool:
-        return item["kind"] == "gift_card"
+        price, taxable, shippable, heavy = product
+        line = price * item.get("qty", 1)
+        subtotal += line
 
-    def volume_discount(item: dict[str, Any]) -> float:
-        if is_gift_card(item) or item.get("qty", 1) < 3:
-            return 0.0
-        return line_total(item) * 0.05
+        if taxable:
+            tax += line * 0.16
+        if shippable and heavy:
+            shipping += 3
 
-    merch_items = [item for item in order["items"] if not is_gift_card(item)]
-    gift_card_total = sum(line_total(item) for item in order["items"] if is_gift_card(item))
-    merchandise_total = sum(line_total(item) for item in merch_items)
+    discount = (subtotal + tax + shipping) * 0.10 if coupon == "SAVE10" else 0
 
-    discount = sum(volume_discount(item) for item in merch_items)
-    if order.get("coupon") == "WELCOME10":
-        discount += (merchandise_total - discount) * 0.10
+    if user.get("premium") and subtotal - discount > 100:
+        shipping = 0
 
-    shipping = BASE_SHIPPING
-    if order.get("customer_tier") == "vip" and merchandise_total >= 75:
-        shipping = 0.0
-    elif any(item.get("heavy") for item in merch_items):
-        shipping += HEAVY_SURCHARGE
+    return {
+        "subtotal": round(subtotal, 2),
+        "tax": round(tax, 2),
+        "shipping": round(shipping, 2),
+        "discount": round(discount, 2),
+        "total": round(subtotal + tax + shipping - discount, 2),
+        "warnings": warnings,
+    }
 
-    tax = (merchandise_total - discount) * TAX_RATE
-    return round(merchandise_total + gift_card_total - discount + tax + shipping, 2)
+
+def summarize_cart_good_result(cart, user, coupon=None):
+    """Better prompt result: same shape, clearer rules, fixed edge cases."""
+    subtotal = 0
+    tax = 0
+    has_heavy_item = False
+    warnings = []
+
+    for item in cart:
+        product = PRODUCTS.get(item.get("sku"))
+        if product is None:
+            warnings.append("unknown sku ignored")
+            continue
+
+        price, taxable, shippable, heavy = product
+        line = price * item.get("qty", 1)
+        subtotal += line
+
+        if taxable:
+            tax += line * 0.16
+        if shippable and heavy:
+            has_heavy_item = True
+
+    discount = subtotal * 0.10 if coupon == "SAVE10" else 0
+    shipping = 0 if user.get("premium") and subtotal >= 100 else 5
+    if shipping and has_heavy_item:
+        shipping += 3
+
+    return {
+        "subtotal": round(subtotal, 2),
+        "tax": round(tax, 2),
+        "shipping": round(shipping, 2),
+        "discount": round(discount, 2),
+        "total": round(subtotal + tax + shipping - discount, 2),
+        "warnings": warnings,
+    }
+
+
+NORMAL_CART = [{"sku": "book"}, {"sku": "usb", "qty": 2}, {"sku": "missing"}]
+BUG_REVEALING_CART = [{"sku": "keyboard"}]
 
 
 if __name__ == "__main__":
-    messy = total_messy(SAMPLE_ORDER)
-    meh = total_meh_result(SAMPLE_ORDER)
-    good = total_good_result(SAMPLE_ORDER)
+    normal_user = {"premium": False}
+    premium_user = {"premium": True}
 
-    assert messy == meh == good
+    assert summarize_cart(NORMAL_CART, normal_user) == summarize_cart_meh_result(NORMAL_CART, normal_user)
+    assert summarize_cart(NORMAL_CART, normal_user) == summarize_cart_good_result(NORMAL_CART, normal_user)
+
+    messy_edge = summarize_cart(BUG_REVEALING_CART, premium_user, coupon="SAVE10")
+    meh_edge = summarize_cart_meh_result(BUG_REVEALING_CART, premium_user, coupon="SAVE10")
+    good_edge = summarize_cart_good_result(BUG_REVEALING_CART, premium_user, coupon="SAVE10")
+
+    assert messy_edge == meh_edge
+    assert good_edge != messy_edge
+    assert good_edge["discount"] == 10
+    assert good_edge["shipping"] == 0
 
     print("Vague prompt:")
     print(VAGUE_PROMPT)
@@ -143,4 +194,11 @@ if __name__ == "__main__":
     print("Better prompt:")
     print(BETTER_PROMPT.strip())
     print()
-    print(f"All versions preserve the sample result: {good}")
+    print("Bug-revealing input:")
+    print(BUG_REVEALING_CART, premium_user, "coupon=SAVE10")
+    print()
+    print("Messy / meh result:")
+    print(messy_edge)
+    print()
+    print("Better-prompt result:")
+    print(good_edge)
