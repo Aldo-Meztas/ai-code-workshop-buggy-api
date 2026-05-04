@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: check-setup install test test-baseline test-extension test-expert test-validation test-pricing test-security test-refactor test-reports run
+.PHONY: check-setup install test test-baseline test-extension test-expert test-validation test-pricing test-security run
 
 check-setup:
 	$(PYTHON) -c "import sys; print(sys.version.split()[0]); raise SystemExit(0 if sys.version_info >= (3, 10) else 'Python 3.10+ is required')"
@@ -28,12 +28,6 @@ test-pricing:
 
 test-security:
 	pytest tests/test_03_security.py
-
-test-refactor:
-	pytest tests/test_04_refactor_safety.py
-
-test-reports:
-	pytest tests/test_05_reports.py
 
 run:
 	uvicorn app.main:app --reload

@@ -1,11 +1,11 @@
 # AI Code Workshop: Broken Orders API
 
-This is a deliberately broken FastAPI project for practicing how to use AI to
-understand, test, debug, and refactor code.
+This is a deliberately broken FastAPI project for a short workshop on using AI
+to understand, test, debug, and refactor code.
 
-Your job is not to ask AI for a giant fix. Your job is to work in small steps:
-read the code, run one test file, ask better prompts, review the answer, change
-code carefully, and run tests again.
+The goal is to finish the core exercises in a half-day session. Work in small
+steps: run one test file, ask AI for help, review the answer, change code, and
+run the test again.
 
 ## What You Need
 
@@ -40,8 +40,6 @@ py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-Use `py -3.12`, `py -3.11`, or `py -3.10` if that is the version you have.
-
 Keep the virtual environment activated while you work.
 
 ## Step 3: Install Dependencies
@@ -57,10 +55,10 @@ pytest --collect-only
 pytest
 ```
 
-The tests should collect successfully, then many tests should fail. That is
-expected. The failures are the workshop exercises.
+The tests should collect successfully, then several tests should fail. That is
+expected. The failures are the workshop.
 
-## Step 5: Work Through the Exercises
+## Step 5: Do the Three Exercises
 
 Run one exercise at a time:
 
@@ -68,12 +66,9 @@ Run one exercise at a time:
 pytest tests/test_01_validation.py
 pytest tests/test_02_pricing.py
 pytest tests/test_03_security.py
-pytest tests/test_04_refactor_safety.py
-pytest tests/test_05_reports.py
 ```
 
-Each exercise has baseline, extension, and expert tasks in
-`docs/01_task_cards.md`.
+Use `docs/01_task_cards.md` for the instructions for each exercise.
 
 ## Step 6: Use AI in Small Steps
 
@@ -97,7 +92,7 @@ For each exercise:
 5. Run the test again.
 6. Review the AI suggestion before trusting it.
 
-Useful prompt examples are in `docs/02_prompt_patterns.md`.
+More prompt examples are in `docs/02_prompt_patterns.md`.
 
 ## Optional: Run the API
 
@@ -127,7 +122,6 @@ make test
 make test-baseline
 make test-extension
 make test-expert
-make test-refactor
 make run
 ```
 

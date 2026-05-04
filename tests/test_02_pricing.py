@@ -40,20 +40,6 @@ def test_expired_coupon_is_rejected(client):
 
 
 @pytest.mark.extension
-def test_coupon_minimum_subtotal_is_enforced(client):
-    response = client.post(
-        "/orders",
-        headers=auth("user-token-1"),
-        json={
-            "coupon": "BIGORDER15",
-            "items": [{"sku": "BOOK-001", "quantity": 1}],
-        },
-    )
-
-    assert response.status_code in (400, 422)
-
-
-@pytest.mark.expert
 def test_premium_free_shipping_at_exact_threshold_before_discount(client):
     response = client.post(
         "/orders",

@@ -1,79 +1,61 @@
-# 1-Day Practical Workshop Plan
+# Half-Day Practical Workshop Plan
 
-This public plan assumes 10 programmers with mixed experience. Use 5 pairs, or 3 groups of three plus one facilitator-paired participant.
+This plan assumes 10 programmers with mixed experience. Use 5 pairs, or 3
+groups of three plus one facilitator-paired participant.
 
 ## Pre-work
 
-Send participants the setup instructions before the workshop. Ask them to install dependencies, run `pytest --collect-only`, and confirm that the full test suite starts with intentional failures.
+Send participants the setup instructions before the workshop. Ask them to run
+`pytest --collect-only` and confirm that the suite starts with intentional
+failures.
 
-## 09:00–09:20 — Kickoff
-
-No slides unless absolutely necessary.
+## 09:00-09:20 — Kickoff
 
 Do:
 
 1. explain that the repo is intentionally broken
 2. show one bad prompt and one improved prompt
-3. explain the three lanes: baseline, extension, expert
+3. explain the baseline, extension, and expert markers
 
-## 09:20–10:20 — Exercise 1: validation
+Use `examples/refactor_prompt_demo.py` if you want a quick live prompt demo.
+
+## 09:20-10:10 — Exercise 1: validation
 
 Run `pytest tests/test_01_validation.py`.
 
 Facilitator focus:
 
-- juniors: prompt quality and understanding code before editing
-- seniors: where validation should live
+- ask AI to explain the request models before editing
+- compare Pydantic validation vs. explicit service validation
+- keep the fix small
 
-## 10:20–10:35 — Break
+## 10:10-10:20 — Break
 
-## 10:35–12:00 — Exercise 2: pricing
+## 10:20-11:10 — Exercise 2: pricing
 
 Run `pytest tests/test_02_pricing.py`.
 
 Facilitator focus:
 
-- force teams to write/confirm business rules before patching
-- ask seniors to critique AI's proposed design
+- write down business rules before patching
+- watch for AI changing more code than needed
+- ask teams how they checked the numbers
 
-## 12:00–13:00 — Lunch
-
-## 13:00–14:15 — Exercise 3: security
+## 11:10-12:00 — Exercise 3: security
 
 Run `pytest tests/test_03_security.py`.
 
 Facilitator focus:
 
-- test-first security fixes
 - distinguish authentication from authorization
+- ask AI for risks, then require tests before fixes
+- discuss one suggestion the team rejected
 
-## 14:15–14:30 — Break
-
-## 14:30–15:30 — Exercise 4: refactor safely
-
-Run `pytest tests/test_04_refactor_safety.py`.
-
-Facilitator focus:
-
-- small refactors only
-- compare AI-generated refactor plans
-
-## 15:30–16:20 — Exercise 5: reports
-
-Run `pytest tests/test_05_reports.py`.
-
-Facilitator focus:
-
-- requirements clarification
-- partial refund discussion for expert teams
-
-## 16:20–17:00 — Debrief
+## 12:00-12:30 — Debrief
 
 Each team presents:
 
 1. best prompt
-2. worst AI suggestion
-3. one useful test
-4. what they would use tomorrow at work
-
-End by producing a team-level checklist for AI-assisted software engineering.
+2. weakest AI suggestion
+3. one test that saved them
+4. one thing they would use tomorrow at work

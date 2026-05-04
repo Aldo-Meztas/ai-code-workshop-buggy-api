@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import pytest
 
-from app.data import ORDERS
 from tests.conftest import auth
 
 
@@ -65,31 +64,3 @@ def test_quantity_must_be_an_integer_not_a_string(client):
     )
 
     assert response.status_code in (400, 422)
-
-
-@pytest.mark.extension
-def test_quantity_must_not_be_bool(client):
-    response = client.post(
-        "/orders",
-        headers=auth("user-token-1"),
-        json={"items": [{"sku": "BOOK-001", "quantity": True}]},
-    )
-
-    assert response.status_code in (400, 422)
-
-
-@pytest.mark.expert
-def test_mixed_valid_and_invalid_items_do_not_create_partial_order(client):
-    response = client.post(
-        "/orders",
-        headers=auth("user-token-1"),
-        json={
-            "items": [
-                {"sku": "BOOK-001", "quantity": 1},
-                {"sku": "NOPE-999", "quantity": 1},
-            ]
-        },
-    )
-
-    assert response.status_code in (400, 422)
-    assert ORDERS == {}

@@ -12,7 +12,6 @@ pytest --collect-only
 pytest -m baseline
 pytest -m extension
 pytest -m expert
-pytest tests/test_04_refactor_safety.py
 ```
 
 The tests should collect successfully. Some tests should fail because the repo

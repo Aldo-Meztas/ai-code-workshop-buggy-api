@@ -1,14 +1,14 @@
 # Workshop Task Cards
 
-Use these task cards during the workshop. Give participants one card at a time.
+Use these task cards one at a time. This shorter version is designed for a
+half-day workshop.
 
 ## Rules for all exercises
 
 1. Use AI, but do not blindly paste code.
 2. Every AI-generated change must be reviewed by a human.
-3. Keep prompts in a scratch file or notes.
-4. Run tests frequently.
-5. When stuck, ask AI for hypotheses, not final answers.
+3. Run tests frequently.
+4. When stuck, ask AI for hypotheses, not final answers.
 
 Suggested first prompt:
 
@@ -16,14 +16,14 @@ Suggested first prompt:
 You are helping me work on an unfamiliar FastAPI codebase.
 First, inspect the files I give you and summarize:
 1. the main responsibilities,
-2. likely bugs or design smells,
+2. likely risks or design smells,
 3. what tests I should run before changing anything.
 Do not rewrite code yet.
 ```
 
 ---
 
-# Exercise 1 — Validation: AI is weak without context
+# Exercise 1 — Validation
 
 Run:
 
@@ -31,34 +31,26 @@ Run:
 pytest tests/test_01_validation.py
 ```
 
-## Baseline
+## Goal
 
-Make these pass:
+Make invalid orders fail instead of being silently accepted.
+
+## Tasks
 
 - empty orders are rejected
 - unknown SKUs are rejected
 - negative quantities are rejected
+- string quantities like `"2"` are rejected
+- valid orders still work
 
-## Extension
+## Discussion
 
-- reject string quantities like `"2"`
-- reject boolean quantities like `true`
-- improve error messages
-- keep the valid-order test passing
-
-## Expert
-
-Ask AI for two possible validation designs:
-
-1. Pydantic-first validation
-2. service-layer validation
-
-Choose one and write a short justification. Seniors should critique AI's recommendation.
-Then make sure mixed valid and invalid items fail atomically without creating a partial order.
+- Should validation live in Pydantic models, service code, or both?
+- How did your prompt change after seeing the first AI answer?
 
 ---
 
-# Exercise 2 — Pricing: from patching to business-rule reasoning
+# Exercise 2 — Pricing
 
 Run:
 
@@ -66,27 +58,25 @@ Run:
 pytest tests/test_02_pricing.py
 ```
 
-## Baseline
+## Goal
 
-Use AI to explain the current pricing code. Do not change anything until you can explain it.
+Fix the most visible pricing rules without rewriting the whole module.
 
-## Extension
+## Tasks
 
-Fix coupon behavior:
-
-- discount applies to subtotal only
-- discount reduces taxable amount
+- coupon discounts apply to subtotal only
+- coupon discounts reduce the taxable amount
 - expired coupons are rejected
-- minimum subtotal is enforced
+- premium customers get free shipping at subtotal `>= 100` before discount
 
-## Expert
+## Discussion
 
-Refactor pricing into smaller functions without hiding business rules. Ask AI to propose edge cases, then write at least three additional tests.
-At least one test should protect a boundary case, such as a threshold, invalid type, or minimum subtotal.
+- Which rules were hidden inside calculation code?
+- Did AI try to rewrite too much?
 
 ---
 
-# Exercise 3 — Security review with AI
+# Exercise 3 — Security
 
 Run:
 
@@ -94,86 +84,29 @@ Run:
 pytest tests/test_03_security.py
 ```
 
-## Baseline
+## Goal
 
-Fix malformed Bearer header handling.
+Fix the most important authentication and authorization gaps.
 
-## Extension
+## Tasks
 
-Fix authorization:
+- malformed Bearer headers are rejected
+- customers cannot read another customer's order
+- non-admins cannot access revenue reports
+- non-admins cannot refund orders
 
-- customers cannot read other customers' orders
-- non-admins cannot access reports
+## Discussion
 
-## Expert
-
-Fix refund authorization and refund amount validation, including zero and negative amounts. Ask AI to do a mini threat model of this API, then reject at least one over-engineered suggestion.
-
----
-
-# Exercise 4 — Refactor legacy code safely
-
-Run:
-
-```bash
-pytest tests/test_04_refactor_safety.py
-```
-
-## Baseline
-
-Ask AI to identify smells in `app/pricing.py` and `app/reports.py`. Pick only one small refactor.
-
-## Extension
-
-Extract helpers while keeping behavior covered by tests.
-
-## Expert
-
-Design a cleaner boundary between:
-
-- request validation
-- domain rules
-- pricing calculation
-- persistence
-- reporting
-
-Do not implement all of it. Write the design and one incremental step.
+- What is the difference between authentication and authorization?
+- Which AI suggestion would you reject before production?
 
 ---
 
-# Exercise 5 — Reports: AI-assisted requirements repair
+# Final Debrief
 
-Run:
-
-```bash
-pytest tests/test_05_reports.py
-```
-
-## Baseline
-
-Make the admin report endpoint work.
-
-## Extension
-
-Report merchandise revenue only, not shipping.
-
-## Expert
-
-Refunded orders should not count as revenue. Make report ordering deterministic and verify multiple customers are grouped correctly.
-
-Then discuss partial refunds:
-
-- Should the report subtract the refunded amount?
-- Should partially refunded orders appear with adjusted revenue?
-- What audit data would you need before making that rule permanent?
-
----
-
-# Final team debrief
-
-Each team presents:
+Each team shares:
 
 1. best prompt they wrote
 2. worst AI suggestion they received
 3. one test that saved them
-4. one place they would use AI differently at work tomorrow
+4. one thing they would use at work tomorrow
