@@ -208,6 +208,7 @@ Authorization: Bearer admin-token
 
 - `docs/01_task_cards.md`: participant-facing exercise cards
 - `docs/02_prompt_patterns.md`: reusable prompt patterns
+- `examples/refactor_prompt_demo.py`: small presentation demo for prompt quality
 - `docs/prompt_journal_template.md`: worksheet for tracking prompts and results
 - `docs/ai_patch_review_lab.md`: practice reviewing AI-generated patches
 - `docs/workshop_rubric.md`: scoring and debrief guide
