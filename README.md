@@ -1,116 +1,68 @@
 # AI Code Workshop: Broken Orders API
 
-A deliberately flawed FastAPI codebase for a practical workshop on using AI to
-understand, test, analyze, and refactor code in small safe steps.
+This is a deliberately broken FastAPI project for practicing how to use AI to
+understand, test, debug, and refactor code.
 
-The project is intentionally not production-ready. Your job is to use an AI
-assistant as a collaborator while you decide what to trust, what to test, and
-what to reject.
+Your job is not to ask AI for a giant fix. Your job is to work in small steps:
+read the code, run one test file, ask better prompts, review the answer, change
+code carefully, and run tests again.
 
-## Who this is for
-
-This workshop works best for mixed-experience teams. The same repo supports:
-
-- baseline tasks for everyone
-- extension tasks for people moving quickly
-- expert tasks for senior engineers and deeper design discussion
-
-Work in pairs or groups of three. Rotate the keyboard driver every 20-30
-minutes.
-
-## What you will practice
-
-- orienting yourself in unfamiliar code
-- turning vague prompts into useful engineering instructions
-- reading failing tests before editing code
-- separating confirmed bugs from guesses
-- asking AI for options, then making the engineering decision yourself
-- writing tests before changing behavior
-- reviewing AI-generated code critically
-- refactoring without changing behavior accidentally
-
-## Prerequisites
+## What You Need
 
 - Python 3.10 or newer
 - Git
 - A code editor
-- An AI coding assistant or chat-based model
+- An AI assistant
 
-This repo was locally verified with Python 3.13.
+This repo was tested with Python 3.13.
 
-Get the code first:
+## Step 1: Get the Code
 
 ```bash
 git clone https://github.com/kalinbas/ai-code-workshop-buggy-api.git
 cd ai-code-workshop-buggy-api
 ```
 
-Check your Python version first:
+## Step 2: Create a Virtual Environment
+
+On macOS or Linux:
 
 ```bash
-python3 --version
-```
-
-If that prints a version below 3.10, use a newer executable such as
-`python3.13`, `python3.12`, `python3.11`, or `python3.10` in the setup commands.
-
-## Setup on macOS or Linux
-
-```bash
-PYTHON=python3.13  # change this if your Python 3.10+ uses another name
+PYTHON=python3.13  # change this to python3.12, python3.11, or python3.10 if needed
 $PYTHON -m venv .venv
 source .venv/bin/activate
-python -m pip install -e ".[dev]"
-pytest --collect-only
-pytest
 ```
 
-## Setup on Windows PowerShell
+On Windows PowerShell:
 
 ```powershell
 py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
+```
+
+Use `py -3.12`, `py -3.11`, or `py -3.10` if that is the version you have.
+
+Keep the virtual environment activated while you work.
+
+## Step 3: Install Dependencies
+
+```bash
 python -m pip install -e ".[dev]"
+```
+
+## Step 4: Check the Starting Point
+
+```bash
 pytest --collect-only
 pytest
 ```
 
-Use `py -3.12`, `py -3.11`, or `py -3.10` if that is the Python version you
-have installed.
+The tests should collect successfully, then many tests should fail. That is
+expected. The failures are the workshop exercises.
 
-The full test suite should collect successfully and then fail. That is the
-starting point for the workshop.
+## Step 5: Work Through the Exercises
 
-Keep the virtual environment activated for the commands below.
-
-Run the API:
-
-```bash
-uvicorn app.main:app --reload
-```
-
-Open the local API docs:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-## Useful Commands
-
-```bash
-make check-setup      # confirm Python version
-make test             # all tests
-make test-baseline    # baseline lane tests
-make test-extension   # extension lane tests
-make test-expert      # expert lane tests
-make test-refactor    # refactor guardrails
-make run              # start the API
-```
-
-If your newer Python is not named `python3`, run commands as
-`make PYTHON=python3.13 check-setup`, or activate the virtual environment first.
-
-You can also run one exercise at a time:
+Run one exercise at a time:
 
 ```bash
 pytest tests/test_01_validation.py
@@ -120,17 +72,10 @@ pytest tests/test_04_refactor_safety.py
 pytest tests/test_05_reports.py
 ```
 
-## How to Work With AI
+Each exercise has baseline, extension, and expert tasks in
+`docs/01_task_cards.md`.
 
-Use AI, but do not treat it as the authority.
-
-1. Ask it to inspect and summarize before asking for code.
-2. Give it the failing test, the relevant files, and the constraints.
-3. Ask for hypotheses and verification steps before fixes.
-4. Make the smallest change that explains the test result.
-5. Run tests after each change.
-6. Review AI-generated patches as if they came from a teammate.
-7. Be ready to reject suggestions you cannot explain.
+## Step 6: Use AI in Small Steps
 
 Start with this prompt:
 
@@ -143,25 +88,30 @@ First, inspect the files I provide and summarize:
 Do not rewrite code yet.
 ```
 
-Keep a prompt journal as you go. A template is available in
-`docs/prompt_journal_template.md`.
+For each exercise:
 
-## Exercise Map
+1. Run the test file.
+2. Give AI the failing test and relevant code.
+3. Ask for possible causes before asking for code.
+4. Make one small change.
+5. Run the test again.
+6. Review the AI suggestion before trusting it.
 
-| Exercise | Focus | Start Command |
-| --- | --- | --- |
-| 1 | Request validation and atomic failures | `pytest tests/test_01_validation.py` |
-| 2 | Pricing rules and business logic | `pytest tests/test_02_pricing.py` |
-| 3 | Authentication, authorization, and refunds | `pytest tests/test_03_security.py` |
-| 4 | Refactoring with guardrails | `pytest tests/test_04_refactor_safety.py` |
-| 5 | Reports and requirements repair | `pytest tests/test_05_reports.py` |
+Useful prompt examples are in `docs/02_prompt_patterns.md`.
 
-Each exercise has baseline, extension, and expert paths. See
-`docs/01_task_cards.md` for the full workshop flow.
+## Optional: Run the API
 
-## Local Test Tokens
+```bash
+uvicorn app.main:app --reload
+```
 
-Use these `Authorization` headers while testing protected endpoints:
+Open:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+Use these local test tokens:
 
 ```text
 Authorization: Bearer user-token-1
@@ -169,46 +119,29 @@ Authorization: Bearer premium-token-1
 Authorization: Bearer admin-token
 ```
 
-## Business Rules to Discover and Enforce
+## Useful Make Commands
 
-### Orders
+```bash
+make check-setup
+make test
+make test-baseline
+make test-extension
+make test-expert
+make test-refactor
+make run
+```
 
-- An order must contain at least one item.
-- `sku` must exist in the catalog.
-- `quantity` must be an integer between 1 and 20.
-- Invalid requests should not create partial orders.
+If `make check-setup` uses the wrong Python, run:
 
-### Pricing
+```bash
+make PYTHON=python3.13 check-setup
+```
 
-- Subtotal is the sum of item price times quantity.
-- Coupon discounts apply to subtotal only.
-- Coupon discounts reduce the taxable amount.
-- Expired coupons are invalid.
-- Coupons with a minimum subtotal must enforce it.
-- Premium customers receive free shipping when subtotal is at least 100 before
-  discount.
-- Gift cards are not taxable and are not shippable.
+## Extra Workshop Files
 
-### Security
-
-- Auth headers must use the exact `Bearer <token>` format.
-- Only the owner or an admin can read an order.
-- Only admins can refund orders.
-- Only admins can access revenue reports.
-
-### Reporting
-
-- Revenue reports should count merchandise subtotal after discounts.
-- Shipping is not revenue for this report.
-- Refunded orders should not count as revenue.
-- Partial refunds are intentionally left as a requirements discussion for the
-  expert lane.
-
-## Workshop Materials
-
-- `docs/01_task_cards.md`: participant-facing exercise cards
-- `docs/02_prompt_patterns.md`: reusable prompt patterns
-- `examples/refactor_prompt_demo.py`: small presentation demo for prompt quality
-- `docs/prompt_journal_template.md`: worksheet for tracking prompts and results
-- `docs/ai_patch_review_lab.md`: practice reviewing AI-generated patches
-- `docs/workshop_rubric.md`: scoring and debrief guide
+- `docs/01_task_cards.md`: exercise instructions
+- `docs/02_prompt_patterns.md`: prompts to try
+- `docs/prompt_journal_template.md`: worksheet for tracking prompts
+- `docs/ai_patch_review_lab.md`: checklist for reviewing AI output
+- `docs/workshop_rubric.md`: debrief rubric
+- `examples/refactor_prompt_demo.py`: small presentation demo
